@@ -146,8 +146,9 @@ my class IO::Socket::Async {
 
     multi method Supply(IO::Socket::Async:D: :$bin, :$buf = nqp::create(buf8.^pun), :$datagram, :$enc, :$scheduler = $*SCHEDULER) {
         if $bin {
-            Supply.new: SocketReaderTappable.new:
-                :$!VMIO, :$scheduler, :$buf, :$!close-promise, udp => $!udp && $datagram
+            Supply.new(SocketReaderTappable.new(:$!VMIO, :$scheduler, :$buf,
+                                                :$!close-promise, udp => $!udp && $datagram))
+            .on-close({self.close})
         }
         else {
             my $bin-supply = self.Supply(:bin, :$datagram);
